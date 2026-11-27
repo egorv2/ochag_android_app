@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Очаг</string>
+    <string name="title_activity_main">Очаг</string>
+    <string name="package_name">ru.ochag.assistant</string>
+    <string name="custom_url_scheme">ru.ochag.assistant</string>
+</resources>
