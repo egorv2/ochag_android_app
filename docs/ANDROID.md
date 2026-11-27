@@ -98,6 +98,14 @@ Node 20 + JDK 17 + Android SDK (platform 34, build-tools 34.0.0) → `npm ci` �
 (коммит с `[skip ci]`, чтобы не было повторного запуска). Запускается при push в ветку
 или вручную: `gh workflow run build-apk.yml`.
 
+Собранный APK: 3,7 МБ, `ru.ochag.assistant`, `versionName 1.0`, `minSdk 22`, `targetSdk 34`,
+подпись v1 + v2/v3, `sha256` указан в логе шага «Collect APK». Установка:
+`adb install -r apk/Ochag-debug.apk`.
+
+> Это debug-сборка с debug-keystore и разрешённым cleartext/mixed content. Для распространения
+> нужен release-ключ, HTTPS-бэкенд и отключение `cleartext` / `allowMixedContent` /
+> `usesCleartextTraffic`.
+
 ## 8. Что осталось за рамками
 
 Подпись release-сборки (keystore), Play Store, push-уведомления, wake word и VAD, фоновая запись,

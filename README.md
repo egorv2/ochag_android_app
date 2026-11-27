@@ -7,6 +7,24 @@ STT/TTS, источники поиска и двухфазная отправк�
 
 ---
 
+## Готовый APK
+
+`apk/Ochag-debug.apk` — debug-сборка (3,7 МБ), собранная в GitHub Actions и лежащая в этой ветке.
+[Скачать APK](https://github.com/egorv2/ochag_android_app/blob/arena/0387104b-ochag-android-app/apk/Ochag-debug.apk?raw=true)
+или взять артефакт `Ochag-debug-apk` в [Actions](https://github.com/egorv2/ochag_android_app/actions).
+
+- пакет `ru.ochag.assistant`, `versionName 1.0`, `minSdk 22`, `targetSdk 34`, compileSdk 34;
+- подписан debug-ключом (v1 `CERT.RSA` + APK Signature Scheme v2/v3);
+- внутри `classes*.dex` Capacitor, `assets/public/` — собранное веб-приложение;
+- разрешения `INTERNET`, `RECORD_AUDIO`, `MODIFY_AUDIO_SETTINGS`, `usesCleartextTraffic` для dev.
+
+Установка: `adb install -r apk/Ochag-debug.apk`. После запуска в «Подключении» укажите полный адрес
+бэкенда (для эмулятора `http://10.0.2.2:8000`, для устройства — LAN IP) и API-ключ.
+Пересборка: `gh workflow run build-apk.yml` (или любой push в ветку) — workflow сам обновит APK в `apk/`.
+Подробности и release-подпись → [docs/ANDROID.md](docs/ANDROID.md).
+
+---
+
 ## Что было изучено в бэкенде
 
 Бэкенд — FastAPI + SQLite, все модели подключаются по OpenAI-совместимому протоколу, в базовом режиме
