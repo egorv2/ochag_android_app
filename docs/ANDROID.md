@@ -89,7 +89,16 @@ npm run cap:sync
 | «Черновик не найден» / 409 | Истёк TTL (10 мин), сменился `session_id`, либо черновик уже отправлен. |
 | Белый экран после обновления | Запустите `npm run cap:sync`, чтобы обновить `assets/public`. |
 
-## 7. Что осталось за рамками
+## 7. Сборка в GitHub Actions (для окружений без Android SDK)
+
+Workflow `.github/workflows/build-apk.yml` собирает debug-APK на `ubuntu-latest`:
+Node 20 + JDK 17 + Android SDK (platform 34, build-tools 34.0.0) → `npm ci` → `npm run build` →
+`npx cap sync android` → `./gradlew assembleDebug`. Готовый файл публикуется артефактом
+`Ochag-debug-apk` **и** коммитится обратно в ветку как `apk/Ochag-debug.apk`
+(коммит с `[skip ci]`, чтобы не было повторного запуска). Запускается при push в ветку
+или вручную: `gh workflow run build-apk.yml`.
+
+## 8. Что осталось за рамками
 
 Подпись release-сборки (keystore), Play Store, push-уведомления, wake word и VAD, фоновая запись,
 реальный MAX-мост/бот, пользовательская авторизация вместо общего API-ключа.

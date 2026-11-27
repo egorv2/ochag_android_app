@@ -1,0 +1,93 @@
+name: Build Android APK
+
+# В песочнице Arena нет JDK/Android SDK и закрыты services.gradle.org / dl.google.com,
+# поэтому APK собирается в CI (полный Android-тулчейн) и возвращается в ветку файлом apk/Ochag-debug.apk.
+on:
+  push:
+    branches:
+      - arena/0387104b-ochag-android-app
+    paths:
+      - 'src/**'
+      - 'public/**'
+      - 'android/**'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'index.html'
+      - 'vite.config.ts'
+      - 'capacitor.config.ts'
+      - 'docs/**'
+      - '.github/workflows/build-apk.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: apk-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-apk:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: |
+          yes | sdkmanager --licenses > /dev/null 2>&1 || true
+          sdkmanager --install "platforms;android-34" "build-tools;34.0.0" "platform-tools"
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Build web app
+        run: npm run build
+
+      - name: Sync Capacitor project
+        run: npx cap sync android
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew --no-daemon --stacktrace assembleDebug
+
+      - name: Collect APK
+        run: |
+          mkdir -p apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk apk/Ochag-debug.apk
+          ls -lh apk/Ochag-debug.apk
+          sha256sum apk/Ochag-debug.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Ochag-debug-apk
+          path: apk/Ochag-debug.apk
+          retention-days: 30
+
+      - name: Publish APK back to branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f apk/Ochag-debug.apk
+          if git diff --cached --quiet; then
+            echo "APK не изменился — коммит не нужен"
+          else
+            git commit -m "chore: debug APK from CI [skip ci]"
+            git push origin HEAD:${{ github.ref_name }}
+          fi
